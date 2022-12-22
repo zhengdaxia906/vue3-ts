@@ -9,16 +9,18 @@ class LYRequest {
     this.instance = axios.create(config)
     this.interceptors = config.interceptors
     // 添加实例配置传来的拦截器
-    console.log(this.interceptors)
-
+    // console.log(config.interceptors)
     this.instance.interceptors.request.use((config) => {
       return config
     })
+    this.instance.interceptors.request.use(
+      this.interceptors?.requestInterceptor,
+      this.interceptors?.requestInterceptorCatch
+    )
     this.instance.interceptors.response.use(
       this.interceptors?.responseInterceptor,
       this.interceptors?.responseInterceptorCatch
     )
-
     // 可以在这添加所有都需要的拦截器
     this.instance.interceptors.response.use(
       (res) => {
