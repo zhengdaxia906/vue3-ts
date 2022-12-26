@@ -44,7 +44,7 @@
 import { defineComponent } from 'vue'
 import loginAccount from './login-account.vue'
 import loginPhone from './login-phone.vue'
-import { ref, reactive, toRefs, onBeforeMount, onMounted } from 'vue'
+import { ref } from 'vue'
 // interface DataProps {}
 export default defineComponent({
   name: '',

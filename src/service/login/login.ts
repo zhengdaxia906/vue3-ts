@@ -19,6 +19,6 @@ export function requestUserInfoById(id: number) {
 }
 export function requestUserMenusById(id: number) {
   return request.get<IDataType>({
-    url: loginApi.UserMenus + id
+    url: loginApi.UserMenus + id + '/menu'
   })
 }
