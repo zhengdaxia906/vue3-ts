@@ -30,7 +30,7 @@ const loginMudule: Module<ILoginState, rootStateType> = {
     changeUserMenus(state, payload) {
       state.userMenus = payload
 
-      //处理菜单生成动态路由表routes并注册
+      //处理菜单生成动态路由表routes并注册     放在这里加载路由也方便数据持久化 避免刷新问题
       const routes = mapMenusToRoutes(payload)
       routes.forEach((item) => {
         router.addRoute('main', item)
@@ -59,7 +59,7 @@ const loginMudule: Module<ILoginState, rootStateType> = {
       // 登录成功后跳转
       router.push('/main')
     },
-    // 初始化vuex登录相关数据 ——数据持久化
+    // 初始化vuex登录相关数据 ——  数据持久化
     loadLocalLogin({ commit }) {
       const token = localCache.getCache('token')
       if (token) {

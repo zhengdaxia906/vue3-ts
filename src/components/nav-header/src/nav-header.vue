@@ -5,8 +5,9 @@
       <Expand v-else />
     </el-icon>
     <div class="content">
-      <div>面包屑</div>
-      <!-- 下拉菜单 -->
+      <LyBreadCrumb :breadcrumbs="breadcrumbs" />
+      <!-- <div>面包屑</div> -->
+      <!-- 用户信息下拉菜单 -->
       <div>
         <el-dropdown>
           <span class="el-dropdown-link">
@@ -29,20 +30,35 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
-
+import { defineComponent, ref, computed } from 'vue'
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
+import LyBreadCrumb, { IBreadcrumb } from '@/components/breadcrumb'
+import { MapBreadcrumb } from '@/utils/mapMenus'
 export default defineComponent({
   name: '',
+  components: {
+    LyBreadCrumb
+  },
   emits: ['foldChange'],
   setup(props, { emit }) {
+    // 收缩开关
     const isFold = ref(false)
     const handleFoldClick = () => {
       isFold.value = !isFold.value
       emit('foldChange', isFold.value)
     }
+    // 面包屑数据 [{name:,path:}]
+
+    const breadcrumbs = computed(() => {
+      const userMenus = useStore().state.login.userMenus
+      const currentPath = useRoute().path
+      return MapBreadcrumb(userMenus, currentPath)
+    })
     return {
       isFold,
-      handleFoldClick
+      handleFoldClick,
+      breadcrumbs
     }
   }
 })
@@ -51,6 +67,7 @@ export default defineComponent({
 .nav-header {
   width: 100%;
   display: flex;
+  align-items: center;
   .fold {
     font-size: 30px;
   }

@@ -8,17 +8,18 @@
       <span v-if="!isCollapse" class="title">Vue3+Ts</span>
     </div>
     <el-menu
-      default-active="2"
+      :default-active="currentMenu"
       class="el-menu-vertical-demo"
       :collapse="isCollapse"
       :collapse-transition="false"
       background-color="#001529"
       text-color="#b7bdc3"
+      router
     >
       <!-- 二级菜单 -->
       <template v-for="item in userMenus" :key="item.id">
         <template v-if="item.type === 1">
-          <el-sub-menu :index="item.id + ''">
+          <el-sub-menu :index="item.url + ''">
             <template v-slot:title>
               <component
                 :is="item.icon.slice(7)"
@@ -28,7 +29,7 @@
             </template>
             <!-- 子标题 -->
             <template v-for="subItem in item.children" :key="subItem.id">
-              <el-menu-item @click="handleMenu(subItem)">
+              <el-menu-item :index="subItem.url" @click="handleMenu(subItem)">
                 <i v-if="subItem.icon" :class="item.icon"></i>
                 <span>{{ subItem.name }}</span>
               </el-menu-item>
@@ -47,9 +48,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from 'vue'
+import { defineComponent, computed, ref } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
+import { matchCurrentMenu } from '@/utils/mapMenus'
 export default defineComponent({
   name: '',
   props: {
@@ -61,15 +63,22 @@ export default defineComponent({
   setup() {
     const store = useStore()
     const userMenus = computed(() => store.state.login.userMenus)
-    const router = useRouter()
+    const route = useRoute()
+    const currentPath = route.path
+    // 匹配菜单选中项、
+    console.log(userMenus.value, currentPath)
+
+    const menu = matchCurrentMenu(userMenus.value, currentPath)
+    console.log(menu)
+
+    const currentMenu = ref(menu.id + '')
     // 菜单点击
     const handleMenu = (item: any) => {
-      router.push({
-        path: item.url ?? '/not-found '
-      })
+      console.log('点击菜单')
     }
     return {
       userMenus,
+      currentMenu,
       handleMenu
     }
   }
