@@ -10,8 +10,8 @@ export interface IFormItem {
   otherOptions?: any //特殊属性
 }
 export interface LyFormConfig {
-  fromItems: IFormItem[]
+  formItems: IFormItem[]
   labelWidth?: string
-  colLayout: any
-  itemLayout: any
+  colLayout?: any
+  itemStyle?: any
 }

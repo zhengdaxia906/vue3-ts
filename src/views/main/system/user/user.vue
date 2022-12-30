@@ -1,41 +1,37 @@
 <template>
   <div class="user">
     <h2>user</h2>
-    <LyForm :formItems="formItems" v-model="formData" />
+    <ly-form v-bind="searchFormConfig" v-model="formData">
+      <template v-slot:header>
+        <h2>头部插槽</h2>
+      </template>
+    </ly-form>
+    {{ formData }}
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-import LyForm, { LyFormConfig } from '@/components/form'
+import { defineComponent, ref, reactive } from 'vue'
+import LyForm from '@/components/form'
+import { searchFormConfig } from './config/search.config'
 export default defineComponent({
   name: 'user',
-  component: {
+  components: {
     LyForm
   },
   setup() {
-    // const formConfig: LyFormConfig = {
-    //   fromItems: [
-    //     {
-    //       label: '用户名',
-    //       placeholder: '请输入用户名'
-    //     },
-    //     {
-    //       label: '密码',
-    //       placeholder: '请输入密码'
-    //     },
-    //     {
-    //       label: '喜欢的运动',
-    //       placeholder: '请输入喜欢的运动'
-    //     },
-    //     {
-    //       label: '创建时间',
-    //       placeholder: '请选择创建时间的范围'
-    //     }
-    //   ]
-    // }
+    let formData = ref({
+      id: '',
+      name: '',
+      password: '',
+      realname: '',
+      cellphone: '',
+      enable: '',
+      createAt: ''
+    })
     return {
-      // formConfig
+      formData, //表单值
+      searchFormConfig //配置项
     }
   }
 })
