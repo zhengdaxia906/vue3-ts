@@ -5,11 +5,12 @@
       <slot name="header" />
     </div>
     <!-- 表单主体 -->
-    <el-form label-width="100px">
+    <el-form label-width="100px" ref="formEl" :model="formData">
       <el-row>
         <template v-for="item in formItems" :key="item.label">
           <el-col v-bind="colLayout">
             <el-form-item
+              :prop="item.field"
               :label="item.label"
               :rules="item.rules"
               :style="itemStyle"
@@ -61,6 +62,7 @@
 <script lang="ts">
 import { defineComponent, ref, reactive, PropType, watch } from 'vue'
 import { IFormItem } from '../types'
+import type { FormInstance, FormRules } from 'element-plus'
 export default defineComponent({
   name: 'LyForm',
   props: {
@@ -95,11 +97,19 @@ export default defineComponent({
   setup(props, { emit }) {
     const formData = reactive({ ...props.modelValue })
     watch(formData, (newValue) => {
-      console.log(formData)
       emit('update:modelValue', newValue), { deep: true }
     })
+    // 表单的校验方法
+    const formEl = ref<FormInstance>()
+    const checkForm = () => {
+      formEl.value?.validate((valid) => {
+        return valid
+      })
+    }
     return {
-      formData
+      formData,
+      formEl,
+      checkForm
     }
   }
 })

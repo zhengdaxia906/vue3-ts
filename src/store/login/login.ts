@@ -11,6 +11,7 @@ import {
 } from '@/service/login/login'
 import { IAccount } from '@/service/login/type'
 
+//Module接口接收泛型<S,R>   S:当前模块state类型,R:根模块state类型
 const loginMudule: Module<ILoginState, rootStateType> = {
   namespaced: true,
   state() {

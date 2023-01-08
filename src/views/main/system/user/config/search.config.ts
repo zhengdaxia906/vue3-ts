@@ -13,19 +13,20 @@ export const searchFormConfig: LyFormConfig = {
       field: 'id',
       type: 'input',
       label: 'id',
-      placeholder: '请输入id'
+      placeholder: '请输入id',
+      rules: [
+        {
+          required: true,
+          message: '请输入id',
+          trigger: 'blur'
+        }
+      ]
     },
     {
       field: 'name',
       type: 'input',
       label: '用户名',
       placeholder: '请输入用户名'
-    },
-    {
-      field: 'password',
-      type: 'password',
-      label: '密码',
-      placeholder: '请输入密码'
     },
     {
       field: 'realname',

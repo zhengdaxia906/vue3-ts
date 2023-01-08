@@ -1,7 +1,7 @@
 import { createStore, Store, useStore as useVuexStore } from 'vuex'
 import { rootStateType, IStoreType } from './type'
 import login from './login/login'
-
+import system from './main/system/system'
 const store = createStore<rootStateType>({
   state: () => {
     return {
@@ -12,7 +12,7 @@ const store = createStore<rootStateType>({
   mutations: {},
   getters: {},
   actions: {},
-  modules: { login }
+  modules: { login, system }
 })
 export function setupStore() {
   store.dispatch('login/loadLocalLogin')

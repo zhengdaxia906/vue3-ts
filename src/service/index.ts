@@ -11,7 +11,7 @@ const request = new LYRequest({
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`
       }
-      console.log(token)
+      // console.log(token)
       return config
     },
     requestInterceptorCatch: (err) => {

@@ -66,10 +66,10 @@ export default defineComponent({
     const route = useRoute()
     const currentPath = route.path
     // 匹配菜单选中项、
-    console.log(userMenus.value, currentPath)
+    // console.log(userMenus.value, currentPath)
 
     const menu = matchCurrentMenu(userMenus.value, currentPath)
-    console.log(menu)
+    // console.log(menu)
 
     const currentMenu = ref(menu.id + '')
     // 菜单点击
