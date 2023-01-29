@@ -8,6 +8,7 @@ export interface IFormItem {
   placeholder?: any
   options?: any[] // select
   otherOptions?: any //特殊属性
+  isHidden?: boolean
 }
 export interface LyFormConfig {
   formItems: IFormItem[]

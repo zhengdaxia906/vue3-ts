@@ -2,109 +2,118 @@
   <div class="user">
     <el-card>
       <!-- 上层表单 -->
-      <ly-form v-bind="searchFormConfig" v-model="formData" ref="lyFormEl">
-        <template v-slot:header>
-          <h2>头部插槽</h2>
-        </template>
-        <template v-slot:footer>
-          <div class="formHandle">
-            <el-button type="primary" @click="reset">重置</el-button>
-            <el-button type="primary" @click="submit">提交</el-button>
-          </div>
-        </template>
-      </ly-form>
-    </el-card>
-    <el-card>
+      <page-search
+        :searchFormConfig="searchFormConfig"
+        @reset="handleResetClick"
+        @queryClick="handleQueryClick"
+      />
       <!-- 下层表格 -->
-      <div class="content">
-        <ly-table :listData="userList" v-bind="tableConfig">
-          <!-- 对状态参数做处理 -->
-          <template v-slot:status="{ row }">
-            <el-button :type="row.enable ? 'success' : 'danger'">
-              {{ row.enable ? '启用' : '禁用' }}</el-button
-            >
-          </template>
-        </ly-table>
-      </div>
+      <page-content
+        ref="pageContentRef"
+        :tableConfig="tableConfig"
+        pageName="users"
+        @handleEditClick="handleEditClick"
+        @handleAddClick="handleAddClick"
+      />
+      <!-- 弹出框 -->
+      <page-modal
+        ref="pageModalRef"
+        :modalConfig="modalConfigRef"
+        pageName="users"
+      />
     </el-card>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, reactive, computed } from 'vue'
+// import { nextTick } from '@vue/runtime-core'
 import { useStore } from 'vuex'
-import { nextTick } from '@vue/runtime-core'
-import LyForm from '@/components/form'
-import LyTable from '@/components/table'
+import PageSearch from '@/components/page-search'
+import PageContent from '@/components/page-content'
+import PageModal from '@/components/page-modal'
 import { searchFormConfig } from './config/search.config'
+import { tableConfig } from './config/content.config'
+import { modalConfig } from './config/modal.config'
+import { usePageSearch } from '@/hooks/usePageSearch'
+import { usePageModal } from '@/hooks/usePageModal'
 export default defineComponent({
   name: 'user',
   components: {
-    LyForm,
-    LyTable
+    PageSearch,
+    PageContent,
+    PageModal
   },
   setup() {
-    let formData = ref({
-      id: '',
-      name: '',
-      password: '',
-      realname: '',
-      cellphone: '',
-      enable: '',
-      createAt: ''
-    })
-    const lyFormEl = ref<any | HTMLElement>(null)
-    const submit = () => {
-      const valid = lyFormEl.value.checkForm()
-      if (valid) {
-        // 通过校验
-      }
+    // const pageModalRef = ref<InstanceType<typeof PageModal>>()
+    // console.log(pageModalRef.value)
+
+    //  在第一次设计双向绑定v-model=formDate的时候，之所以用ref 是因为 ref是将值包裹成对象再去代理。
+    // 若用的是reactive,当子组件update响应更新值的时候，本组件相当于作了一步:formData = newValue,
+    // 此时的formData存储的就不是当初reactive代理返回的，响应性连接丢失，需要搭配toRefs使用过于麻烦
+    // 改为用ref 模板上会自动解包  则相当于:formData.value = newValue，此时的formData是一直处于响应连接状态
+    // let formData = ref({
+    //   id: '',
+    //   name: '',
+    //   password: '',
+    //   realname: '',
+    //   cellphone: '',
+    //   enable: '',
+    //   createAt: ''
+    // })
+    // 更新为:在user父组件同时利用对应hooks充当通信桥梁
+    const [pageContentRef, handleResetClick, handleQueryClick] = usePageSearch()
+
+    // pageModal相关hook逻辑
+    const addCb = () => {
+      const passwordItem = modalConfig.formItems.find(
+        (item) => item.field === 'password'
+      )
+      passwordItem!.isHidden = false
     }
-    // 表格相关
+    const editCb = () => {
+      const passwordItem = modalConfig.formItems.find(
+        (item) => item.field === 'password'
+      )
+      passwordItem!.isHidden = true
+    }
+    // 加载部门和角色列表
     const store = useStore()
-    store.dispatch('system/getPageList', {
-      pageUrl: 'users/list',
-      queryInfo: {
-        offset: 0,
-        size: 10
-      }
+    const modalConfigRef = computed(() => {
+      const department = modalConfig.formItems.find((item) => {
+        return item.field === 'departmentId'
+      })
+      department!.options = store.state.entireDepartment.map((item: any) => {
+        return { title: item.name, value: item.id }
+      })
+      const role = modalConfig.formItems.find((item) => {
+        return item.field === 'roleId'
+      })
+      role!.options = store.state.entireRole.map((item: any) => {
+        return { title: item.name, value: item.id }
+      })
+      return modalConfig
     })
-    const userList = computed(() => store.state.system.userList)
-    // console.log('userList', userList)
-
-    const propList = [
-      { prop: 'name', label: '用户名', minWidth: '100' },
-      { prop: 'realname', label: '真实姓名', minWidth: '100' },
-      { prop: 'cellphone', label: '手机号码', minWidth: '100' },
-      { prop: 'enable', label: '状态', minWidth: '100', slotName: 'status' },
-      {
-        prop: 'createAt',
-        label: '创建时间',
-        minWidth: '250',
-        slotName: 'createAt'
-      },
-      {
-        prop: 'updateAt',
-        label: '更新时间',
-        minWidth: '250',
-        slotName: 'updateAt'
-      },
-      { label: '操作', minWidth: '120', slotName: 'handler' }
-    ]
-    const tableConfig = {
-      showSelectColumn: true,
-      showIndexColumn: true,
-      propList: propList
-    }
-
+    console.log(modalConfigRef)
+    // //????? 调用hook获取公共变量和函数
+    const [pageModalRef, defaultInfo, handleAddClick, handleEditClick] =
+      usePageModal(addCb, editCb)
+    const res = usePageModal(addCb, editCb)
+    console.log(
+      [...res] == [pageModalRef, defaultInfo, handleAddClick, handleEditClick]
+    )
+    // console.log(res)
     return {
-      formData, //表单值
       searchFormConfig, //配置项,
-      userList,
-      propList,
       tableConfig,
-      lyFormEl,
-      submit
+      modalConfigRef,
+      pageContentRef,
+      handleResetClick,
+      handleQueryClick,
+      handleAddClick,
+      handleEditClick,
+      pageModalRef,
+      defaultInfo
     }
   }
 })

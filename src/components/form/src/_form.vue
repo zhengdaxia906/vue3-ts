@@ -1,3 +1,4 @@
+// 双向绑定版本
 <template>
   <div class="LyForm">
     <!-- 头插槽 -->
@@ -5,12 +6,11 @@
       <slot name="header" />
     </div>
     <!-- 表单主体 -->
-    <el-form label-width="100px" :model="modelValue">
+    <el-form label-width="100px" ref="formEl" :model="formData">
       <el-row>
         <template v-for="item in formItems" :key="item.label">
           <el-col v-bind="colLayout">
             <el-form-item
-              v-if="!item.isHidden"
               :prop="item.field"
               :label="item.label"
               :rules="item.rules"
@@ -22,35 +22,30 @@
                   :placeholder="item.placeholder"
                   :show-password="item.type == 'password'"
                   v-bind="item.otherOptions"
-                  :model-value="modelValue[`${item.field}`]"
-                  @input="handleChange($event, item.field)"
+                  v-model="formData[`${item.field}`]"
                 ></el-input>
               </template>
               <!-- 选择框 -->
-              <!-- {{ 'zxf' }}
-              {{ modelValue[departmentId] }} -->
               <template v-else-if="item.type === 'select'">
                 <el-select
                   :placeholder="item.placeholder"
-                  v-bind="item.otherOptions"
                   style="width: 100%"
-                  :model-value="modelValue[`${item.field}`]"
-                  @update:modelValue="handleChange($event, item.field)"
+                  v-bind="item.otherOptions"
+                  v-model="formData[`${item.field}`]"
                 >
                   <el-option
                     v-for="option in item.options"
                     :key="option.value"
                     :value="option.value"
-                    :label="option.title"
-                  ></el-option>
+                  >
+                  </el-option>
                 </el-select>
               </template>
               <!-- 日期 -->
               <template v-else-if="item.type === 'datepicker'">
                 <el-date-picker
                   v-bind="item.otherOptions"
-                  :model-value="modelValue[`${item.field}`]"
-                  @update:modelValue="handleChange($event, item.field)"
+                  v-model="formData[`${item.field}`]"
                 />
               </template>
             </el-form-item>
@@ -58,7 +53,6 @@
         </template>
       </el-row>
     </el-form>
-
     <!-- 尾插槽 -->
     <div class="footer">
       <slot name="footer" />
@@ -69,7 +63,7 @@
 <script lang="ts">
 import { defineComponent, ref, reactive, PropType, watch } from 'vue'
 import { IFormItem } from '../types'
-// import type { FormInstance, FormRules } from 'element-plus'
+import type { FormInstance, FormRules } from 'element-plus'
 export default defineComponent({
   name: 'LyForm',
   props: {
@@ -102,12 +96,21 @@ export default defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
-    const handleChange = (value: any, field: string) => {
-      console.log('handleChange')
-      emit('update:modelValue', { ...props.modelValue, [field]: value })
+    const formData = reactive({ ...props.modelValue })
+    watch(formData, (newValue) => {
+      emit('update:modelValue', newValue), { deep: true }
+    })
+    // 表单的校验方法
+    const formEl = ref<FormInstance>()
+    const checkForm = () => {
+      formEl.value?.validate((valid) => {
+        return valid
+      })
     }
     return {
-      handleChange
+      formData,
+      formEl,
+      checkForm
     }
   }
 })

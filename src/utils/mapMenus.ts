@@ -1,3 +1,4 @@
+// 菜单、路由、权限相关
 import { RouteRecordRaw } from 'vue-router'
 import { IBreadcrumb } from '@/components/breadcrumb'
 let firstMenu: any = null
@@ -52,11 +53,44 @@ export function matchCurrentMenu(
     }
   }
 }
-
 // 面包屑数组
 export function MapBreadcrumb(userMenus: any[], currentPath: string) {
   const breadcrumbs: IBreadcrumb[] = []
   matchCurrentMenu(userMenus, currentPath, breadcrumbs)
   return breadcrumbs
 }
+
+// 操作权限
+export function mapMenuToPermission(userMenus: any[]) {
+  const permissions: string[] = []
+  // 生成权限数组的递归方法
+  const _recurseGetPermission = (userMenus: any[]) => {
+    for (const menu of userMenus) {
+      if (menu.type === 1 || menu.type === 2) {
+        _recurseGetPermission(menu.children ?? [])
+      } else if (menu.type === 3) {
+        permissions.push(menu.permission)
+      }
+    }
+  }
+  _recurseGetPermission(userMenus)
+  return permissions
+}
+
+// 截取菜单所有叶子节点
+export function getMenuLeafsKey(menuList: any[]) {
+  const leafKeys: number[] = []
+  const _recurseGetLeafs = (menuList: any[]) => {
+    for (const item of menuList) {
+      if (item.children) {
+        _recurseGetLeafs(item.children)
+      } else {
+        leafKeys.push(item.id)
+      }
+    }
+  }
+  _recurseGetLeafs(menuList)
+  return leafKeys
+}
+
 export { firstMenu }

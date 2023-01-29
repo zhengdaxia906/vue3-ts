@@ -19,7 +19,7 @@
       <!-- 二级菜单 -->
       <template v-for="item in userMenus" :key="item.id">
         <template v-if="item.type === 1">
-          <el-sub-menu :index="item.url + ''">
+          <el-sub-menu :index="item.url">
             <template v-slot:title>
               <component
                 :is="item.icon.slice(7)"
@@ -71,7 +71,7 @@ export default defineComponent({
     const menu = matchCurrentMenu(userMenus.value, currentPath)
     // console.log(menu)
 
-    const currentMenu = ref(menu.id + '')
+    const currentMenu = ref(menu.url)
     // 菜单点击
     const handleMenu = (item: any) => {
       console.log('点击菜单')

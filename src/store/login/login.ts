@@ -1,6 +1,6 @@
 import { Module } from 'vuex'
 import localCache from '@/utils/cache'
-import { mapMenusToRoutes } from '@/utils/mapMenus'
+import { mapMenusToRoutes, mapMenuToPermission } from '@/utils/mapMenus'
 import router from '@/router'
 import { ILoginState } from './type'
 import { rootStateType } from '../type'
@@ -18,7 +18,8 @@ const loginMudule: Module<ILoginState, rootStateType> = {
     return {
       token: '',
       userInfo: {},
-      userMenus: []
+      userMenus: [],
+      permissions: []
     }
   },
   mutations: {
@@ -30,12 +31,13 @@ const loginMudule: Module<ILoginState, rootStateType> = {
     },
     changeUserMenus(state, payload) {
       state.userMenus = payload
-
       //处理菜单生成动态路由表routes并注册     放在这里加载路由也方便数据持久化 避免刷新问题
       const routes = mapMenusToRoutes(payload)
       routes.forEach((item) => {
         router.addRoute('main', item)
       })
+      // 处理权限操作
+      state.permissions = mapMenuToPermission(payload)
     }
   },
   getters: {},
@@ -48,6 +50,8 @@ const loginMudule: Module<ILoginState, rootStateType> = {
       const { id, token } = res.data
       ctx.commit('setToken', token)
       localCache.setCache('token', token)
+      // 发送初始化的请求(完整的role/department)
+      ctx.dispatch('InitialDataAction', null, { root: true }) //第三个参数表示允许命名空间模块分发根actions
       //2.请求用户信息
       const { data: userInfo } = await requestUserInfoById(id)
       ctx.commit('changeUserInfo', userInfo)
@@ -56,15 +60,17 @@ const loginMudule: Module<ILoginState, rootStateType> = {
       const { data: userMenus } = await requestUserMenusById(id)
       localCache.setCache('userMenus', userMenus)
       ctx.commit('changeUserMenus', userMenus)
-
       // 登录成功后跳转
       router.push('/main')
     },
+
     // 初始化vuex登录相关数据 ——  数据持久化
-    loadLocalLogin({ commit }) {
+    loadLocalLogin({ commit, dispatch }) {
       const token = localCache.getCache('token')
       if (token) {
         commit('setToken', token)
+        // 发送初始化的请求(完整的role/department)
+        dispatch('InitialDataAction', null, { root: true })
       }
       const userInfo = localCache.getCache('userInfo')
       if (userInfo) {
