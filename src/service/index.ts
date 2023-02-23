@@ -25,4 +25,5 @@ const request = new LYRequest({
     }
   }
 })
+
 export default request

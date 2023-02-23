@@ -1,6 +1,7 @@
 <template>
   <div class="login">
     <login-tab></login-tab>
+    <p>LALAL</p>
   </div>
 </template>
 <script>
